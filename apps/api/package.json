@@ -1,0 +1,33 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:ts",
+    "dev:ts": "node --watch --env-file=.env --experimental-strip-types src/index.ts",
+    "build": "tsc",
+    "start": "node --env-file=.env dist/index.js",
+    "lint": "eslint \"src/**/*.ts*\""
+  },
+  "dependencies": {
+    "@repo/database": "*",
+    "@repo/redis": "^1.0.0",
+    "@repo/zod": "^1.0.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.25",
+    "@types/node": "^20.11.24",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3"
+  }
+}

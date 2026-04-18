@@ -1,50 +1,68 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    /* Night Sky / Midnight atmosphere instead of pure harsh black */
+    @apply bg-[#050814] text-[#F8FAFC] font-sans antialiased selection:bg-[#818CF8] selection:text-white;
   }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@layer components {
+  /* Ethereal Night Design System for Mental Health Platform */
+  
+  .flat-btn-primary {
+    @apply inline-flex items-center justify-center font-bold tracking-wide text-lg
+           bg-[#818CF8] text-[#050814] rounded-full h-16 px-10 
+           transition-all duration-300 shadow-[0_0_40px_rgba(129,140,248,0.2)]
+           hover:-translate-y-1 hover:bg-[#A5B4FC] hover:shadow-[0_0_60px_rgba(129,140,248,0.4)] active:translate-y-0 active:scale-95;
   }
 
-  .imgLight {
-    display: none;
+  .flat-btn-secondary {
+    @apply inline-flex items-center justify-center font-bold tracking-wide text-lg
+           bg-[#111827] text-white rounded-full h-16 px-10 border border-[#374151]
+           transition-all duration-300 
+           hover:bg-[#1F2937] hover:-translate-y-1 active:translate-y-0 active:scale-95;
   }
-  .imgDark {
-    display: unset;
+
+  .flat-btn-outline {
+    @apply inline-flex items-center justify-center font-medium tracking-wide text-sm md:text-base
+           bg-white/5 backdrop-blur-sm text-white rounded-full h-12 px-8 
+           border border-white/10
+           transition-all duration-300 
+           hover:bg-white/10 hover:text-white hover border-white/20 hover:-translate-y-1 active:translate-y-0 active:scale-95;
+  }
+  
+  /* Ethereal Frosted Panels */
+  .ethereal-card {
+    @apply bg-[#0B1021]/80 backdrop-blur-md p-10 md:p-12 rounded-[2rem] border border-[#1E293B] shadow-2xl
+           transition-all duration-500 hover:border-[#6366F1]/50 hover:bg-[#0D1429] hover:-translate-y-2;
+  }
+
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 relative z-10;
   }
 }
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.1); opacity: 0.3; }
+}
+
+@keyframes thought-bubble {
+  0%, 100% { opacity: 0.2; transform: translateY(0) scale(1); }
+  50% { opacity: 0.9; transform: translateY(-25px) scale(1.1); }
+}
+
+.animate-float { animation: float 14s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 10s ease-in-out infinite; }
+.animate-thought { animation: thought-bubble 7s ease-in-out infinite; }
