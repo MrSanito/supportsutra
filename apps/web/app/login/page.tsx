@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import api from "../../lib/axios.ts";
+import api from "../../lib/axios";
 
 
 

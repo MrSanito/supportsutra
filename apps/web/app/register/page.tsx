@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import api from "../../lib/axios.ts";
+import api from "../../lib/axios";
 
 
 
