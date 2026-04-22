@@ -6,40 +6,39 @@
 
 @layer base {
   body {
-    /* Night Sky / Midnight atmosphere instead of pure harsh black */
-    @apply bg-[#050814] text-[#F8FAFC] font-sans antialiased selection:bg-[#818CF8] selection:text-white;
+    @apply bg-[#FAFAFC] text-[#1A1A2E] font-sans antialiased selection:bg-[#FF8C8C]/30 selection:text-[#1A1A2E];
   }
 }
 
 @layer components {
-  /* Ethereal Night Design System for Mental Health Platform */
+  /* Pastel Minimalist Design System */
   
   .flat-btn-primary {
     @apply inline-flex items-center justify-center font-bold tracking-wide text-lg
-           bg-[#818CF8] text-[#050814] rounded-full h-16 px-10 
-           transition-all duration-300 shadow-[0_0_40px_rgba(129,140,248,0.2)]
-           hover:-translate-y-1 hover:bg-[#A5B4FC] hover:shadow-[0_0_60px_rgba(129,140,248,0.4)] active:translate-y-0 active:scale-95;
+           bg-[#FF8C8C] text-white rounded-full h-16 px-10 
+           transition-all duration-300 shadow-[0_4px_14px_0_rgba(255,140,140,0.39)]
+           hover:-translate-y-1 hover:bg-[#ff7a7a] hover:shadow-[0_6px_20px_rgba(255,140,140,0.23)] active:translate-y-0 active:scale-95;
   }
 
   .flat-btn-secondary {
     @apply inline-flex items-center justify-center font-bold tracking-wide text-lg
-           bg-[#111827] text-white rounded-full h-16 px-10 border border-[#374151]
+           bg-white text-[#1A1A2E] rounded-full h-16 px-10 border border-slate-200
            transition-all duration-300 
-           hover:bg-[#1F2937] hover:-translate-y-1 active:translate-y-0 active:scale-95;
+           hover:bg-slate-50 hover:-translate-y-1 active:translate-y-0 active:scale-95 shadow-sm;
   }
 
   .flat-btn-outline {
     @apply inline-flex items-center justify-center font-medium tracking-wide text-sm md:text-base
-           bg-white/5 backdrop-blur-sm text-white rounded-full h-12 px-8 
-           border border-white/10
+           bg-white/50 backdrop-blur-sm text-[#1A1A2E] rounded-full h-12 px-8 
+           border border-slate-200
            transition-all duration-300 
-           hover:bg-white/10 hover:text-white hover border-white/20 hover:-translate-y-1 active:translate-y-0 active:scale-95;
+           hover:bg-white hover:-translate-y-1 active:translate-y-0 active:scale-95 shadow-sm;
   }
   
-  /* Ethereal Frosted Panels */
+  /* Pastel Cards */
   .ethereal-card {
-    @apply bg-[#0B1021]/80 backdrop-blur-md p-10 md:p-12 rounded-[2rem] border border-[#1E293B] shadow-2xl
-           transition-all duration-500 hover:border-[#6366F1]/50 hover:bg-[#0D1429] hover:-translate-y-2;
+    @apply bg-white p-10 md:p-12 rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+           transition-all duration-500 hover:border-slate-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-2;
   }
 
   .section-container {
