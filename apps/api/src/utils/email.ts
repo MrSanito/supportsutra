@@ -1,4 +1,4 @@
-import { getVerifyEmailHtml, getOtpHtml, getForgotPasswordHtml } from "../config/email.js";
+import { getVerifyEmailHtml, getOtpHtml, getForgotPasswordHtml } from "../config/email";
 
 export const sendMail = async (to: string, subject: string, html: string) => {
   console.log(`📧 [Email Simulation]: Sending email to ${to}`);

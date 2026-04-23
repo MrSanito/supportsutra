@@ -9,9 +9,9 @@ import {
   logOutUser, 
   refreshCSRF, 
   adminController 
-} from "./auth.controller.js";
-import { isAuth, authorizedAdmin } from "../middlewares/auth.js";
-import { verifyCSRFToken } from "../config/csrfMiddleware.js";
+} from "./auth.controller";
+import { isAuth, authorizedAdmin } from "../middlewares/auth";
+import { verifyCSRFToken } from "../config/csrfMiddleware";
 
 const router = express.Router();
 

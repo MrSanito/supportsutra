@@ -140,7 +140,7 @@ export default function TokenVerifyPage({ params }: TokenPageProps) {
         {/* Helper Link */}
         <div className="mt-8 text-center">
           <Link href="/support" className="text-xs font-bold text-[#8E8E9F] hover:text-[#FF8C8C] transition-colors uppercase tracking-widest">
-            Need Help? Contact Support
+            Need Help? Contact Support 
           </Link>
         </div>
       </div>

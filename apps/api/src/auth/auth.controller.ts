@@ -2,17 +2,17 @@ import type { Request, Response } from "express";
 import crypto from "crypto";
 import { registerSchema, loginSchema } from "@repo/zod";
 import { redis } from "@repo/redis";
-import TryCatch from "../middlewares/trycatch.js";
-import * as authService from "./auth.services.js";
-import { sendMail } from "../config/sendEmail.js";
-import { getOtpHtml, getVerifyEmailHtml } from "../config/email.js";
+import TryCatch from "../middlewares/trycatch";
+import * as authService from "./auth.services";
+import { sendMail } from "../config/sendEmail";
+import { getOtpHtml, getVerifyEmailHtml } from "../config/email";
 import { 
   generateToken, 
   generateAccessToken, 
   verifyRefreshToken, 
   revokeRefreshToken 
-} from "../config/generateToken.js";
-import { refreshCSRFToken } from "../config/csrfMiddleware.js";
+} from "../config/generateToken";
+import { refreshCSRFToken } from "../config/csrfMiddleware";
 
 export const register = TryCatch(async (req: Request, res: Response) => {
   const validation = registerSchema.safeParse(req.body);

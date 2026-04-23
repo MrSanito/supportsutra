@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "@repo/database";
-import TryCatch from "./trycatch.js";
+import TryCatch from "./trycatch";
 
 declare global {
   namespace Express {

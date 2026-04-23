@@ -7,8 +7,6 @@ import {
   useState,
   Dispatch,
   SetStateAction,
-  ReactNode,
-  ReactElement,
 } from "react";
 import api from "../../lib/axios";
 import { toast } from "react-toastify";
@@ -33,7 +31,7 @@ interface User {
 
 const AppContext = createContext<AuthContextType | null>(null);
 
-export const AppProvider = ({ children }: { children: ReactNode }): ReactElement => {
+export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const currentPathName = usePathname();
   console.log(`Current pathname: ${currentPathName}`);
 
@@ -42,12 +40,35 @@ export const AppProvider = ({ children }: { children: ReactNode }): ReactElement
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
+  const [shouldVerify, setShouldVerify] = useState(true);
 
   const publicRoute = ["/", "/login", "/register", "/verify"];
 
+
+  async function fetchUser() {
+    setLoading(true);
+    try {
+      const { data } = await api.get("auth/me", {
+        withCredentials: true,
+      });
+
+      setUser(data as User);
+      setIsAuth(true);
+
+    } catch (error) {
+      console.log(error);
+      setUser(null);
+      setIsAuth(false)
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function logOutUser() {
     try {
-      const { data } = await api.post("/auth/logout");
+      const { data } = await api.post("/auth/logout", {
+        withCredentials: true,
+      });
       toast.success("LogOut SuccessFull");
       setIsAuth(false);
       setUser(null);
@@ -59,34 +80,19 @@ export const AppProvider = ({ children }: { children: ReactNode }): ReactElement
   }
 
   useEffect(() => {
-    const isPublicRoute = publicRoute.some(
-      (route) => currentPathName === route || currentPathName.startsWith(route + "/")
-    );
+const isPublicRoute = publicRoute.some(
+  (route) =>
+    currentPathName === route || currentPathName.startsWith(route + "/"),
+);    console.log("let go", isPublicRoute)
 
-    const checkAuth = async () => {
-      setLoading(true);
-      try {
-        const { data } = await api.get("auth/me");
-        setUser(data.user);
-        setIsAuth(true);
-        // If on login/register and authenticated, go to dashboard
-        if (["/login", "/register"].includes(currentPathName)) {
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        setUser(null);
-        setIsAuth(false);
-        // If on protected route and not authenticated, go to login
-        if (!isPublicRoute) {
-          router.push("/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+    if(isPublicRoute){
+      setLoading(false);
+      return;
+    }
 
-    checkAuth();
-  }, [currentPathName, router]);
+
+    fetchUser();
+  }, []);
 
   return (
     <AppContext.Provider
@@ -99,8 +105,9 @@ export const AppProvider = ({ children }: { children: ReactNode }): ReactElement
 
 export const useAppContext = () => {
   const context = useContext(AppContext);
+
   if (!context) {
-    throw new Error("useAppContext must be used within an AppProvider");
+    throw new Error("App Data must be used within an AppProvider");
   }
   return context;
 };

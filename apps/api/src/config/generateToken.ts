@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { redis } from "@repo/redis";
 import type { Response } from "express";
 import crypto from "crypto";
-import { generateCSRFToken, revokeCSRFToken } from "./csrfMiddleware.js";
+import { generateCSRFToken, revokeCSRFToken } from "./csrfMiddleware";
 
 export const generateToken = async (id: any, res: Response) => {
   const sessionId = crypto.randomBytes(16).toString("hex");

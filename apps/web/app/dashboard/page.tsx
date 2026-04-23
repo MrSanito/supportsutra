@@ -43,7 +43,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex justify-between items-start mb-6 lg:mb-12">
         <div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-[#1A1A2E] mb-1 lg:mb-2">Morning, {user?.name.split(' ')[0]}!</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-[#1A1A2E] mb-1 lg:mb-2">Morning, {user?.name?.split(' ')[0] || 'User'}!</h1>
           <p className="text-[#8E8E9F] text-sm lg:text-base font-medium">Your daily wellness journey</p>
         </div>
         <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-slate-100 flex items-center justify-center text-[#F87171] bg-white shadow-sm hover:bg-slate-50 transition-colors">
