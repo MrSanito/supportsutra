@@ -11,7 +11,7 @@ import { useAppContext } from "../context/AppContext";
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
 
 export default function Dashboard() {
-  const { user, loading } = useAppContext();
+  const { user, loading, logOutUser } = useAppContext();
   const [activeTab, setActiveTab] = useState<"Home" | "Sleep" | "Meditate" | "Exercise" | "Profile">("Home");
   const [activeCategory, setActiveCategory] = useState("All");
   const router = useRouter();
@@ -433,8 +433,8 @@ export default function Dashboard() {
                 <Settings className="w-4 h-4" />
               </button>
             </div>
-            <h2 className="text-2xl font-bold text-[#1A1A2E] mb-1">Vishal</h2>
-            <p className="text-[#8E8E9F] text-sm font-medium mb-6">vishal@example.com</p>
+            <h2 className="text-2xl font-bold text-[#1A1A2E] mb-1">{user?.name || 'User'}</h2>
+            <p className="text-[#8E8E9F] text-sm font-medium mb-6">{user?.email || 'email@example.com'}</p>
             
             <div className="w-full flex justify-around border-t border-slate-100 pt-6">
               <div className="flex flex-col items-center">
@@ -474,7 +474,7 @@ export default function Dashboard() {
             </button>
           ))}
 
-          <button className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-shadow group mt-6">
+          <button onClick={logOutUser} className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-shadow group mt-6">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
                 <LogOut className="w-5 h-5" />

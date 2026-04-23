@@ -52,8 +52,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         withCredentials: true,
       });
 
-      setUser(data as User);
-      setIsAuth(true);
+      if (data.success) {
+        setUser(data.user);
+        setIsAuth(true);
+      } else {
+        setUser(null);
+        setIsAuth(false);
+      }
 
     } catch (error) {
       console.log(error);
