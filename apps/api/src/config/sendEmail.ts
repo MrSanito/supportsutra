@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendMail = async (to: string, subject: string, html: string) => {
   try {
     const result = await resend.emails.send({
-      from: 'Support Sutra <no-reply@zynito.in>', // Use your verified domain address
+      from: 'Support Sutra <no-reply@supportsutraapi.zynito.in>', // Use your verified domain address
       to: [to],
       subject: subject,
       html: html,
