@@ -130,7 +130,7 @@ export const login = TryCatch(async (req: Request, res: Response) => {
   await authService.storeOTP(email, otp);
 
   const subject = "OTP for Login Verification";
-  const html = getOtpHtml({ email, OTP: otp });
+  const html = getOtpHtml({ email, otp });
   
   const mailResult = await sendMail(email, subject, html);
   
