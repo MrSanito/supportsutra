@@ -46,16 +46,16 @@ export const generateToken = async (id: any, res: Response) => {
   await redis.setex(activeSessionKey, 7 * 24 * 60 * 60, sessionId);
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: false, // Set to true in production
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 15 * 60 * 1000,
   });
 
   res.cookie("refreshToken", refreshToken, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "lax",
-    secure: false, // Set to true in production
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   const csrfToken = await generateCSRFToken(id, res);
@@ -114,8 +114,8 @@ export const generateAccessToken = (
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: false, // Set to true in production
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 15 * 60 * 1000,
   });
 };

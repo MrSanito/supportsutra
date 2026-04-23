@@ -14,6 +14,8 @@ declare global {
 
 export const isAuth = TryCatch(async (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+  console.log("isAuth");
+  console.log("token", token);
 
   if (!token) {
     return res.status(401).json({

@@ -169,6 +169,8 @@ export const verifyLogin = TryCatch(async (req: Request, res: Response) => {
 
   const tokenData = await generateToken(user.id, res);
 
+  
+
   return res.status(200).json({
     success: true,
     message: `Welcome, ${user.name}`,

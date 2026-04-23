@@ -10,8 +10,8 @@ export const generateCSRFToken = async (userId: string, res: Response) => {
 
   res.cookie("csrfToken", csrfToken, {
     httpOnly: false,
-    secure: false, // Set to true in production
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 60 * 60 * 1000,
   });
 

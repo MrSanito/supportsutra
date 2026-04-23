@@ -33,10 +33,10 @@ app.use(session({
   saveUninitialized: false,
   proxy: true, // Required for secure cookies behind a proxy if needed
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax', // Use 'none' only with secure: true
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   },
 }));
 
