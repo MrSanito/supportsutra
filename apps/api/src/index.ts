@@ -5,7 +5,7 @@ import session from "express-session";
 import { RedisStore } from "connect-redis";
 import { prisma } from "@repo/database";
 import { redis } from "@repo/redis";
-import rootRouter from "./routes";
+import rootRouter from "./routes.js";
 import type { Request, Response, NextFunction } from "express";
 
 const app = express();
