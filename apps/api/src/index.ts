@@ -1,16 +1,45 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import { RedisStore } from "connect-redis";
 import { prisma } from "@repo/database";
 import { redis } from "@repo/redis";
-import rootRouter from "./routes.ts";
+import rootRouter from "./routes.js";
 import type { Request, Response, NextFunction } from "express";
 
 const app = express();
 
-const port = process.env.PORT || 3000;
+app.use(cookieParser());
 
-app.use(cors());
+const port = process.env.PORT || 3001;
+
+app.use(cors({
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  exposedHeaders: ["Set-Cookie"]
+}));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Update session configuration for cross-port support
+app.use(session({
+  store: new RedisStore({ client: redis }),
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  proxy: true, // Required for secure cookies behind a proxy if needed
+  cookie: {
+    secure: false, // Set to true in production with HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax', // Use 'none' only with secure: true
+  },
+}));
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log("Request URL:", req.url);
   console.log("Request Method:", req.method);
@@ -20,7 +49,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api/v1", rootRouter);
 
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Hello from Express in Turborepo!" });
 });
 

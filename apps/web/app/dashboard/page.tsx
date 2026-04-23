@@ -1,18 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Bell, Search, Play, Home, Moon, HeartPulse, Dumbbell, User, 
   Grid, Brain, Activity, CircleDot, Sparkles, Settings, Shield, HelpCircle, LogOut, Flame, Trophy, ChevronRight
 } from "lucide-react";
 import { Outfit } from "next/font/google";
 import { useRouter } from "next/navigation";
+import { useAppContext } from "../context/AppContext";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
 
 export default function Dashboard() {
+  const { user, loading } = useAppContext();
   const [activeTab, setActiveTab] = useState<"Home" | "Sleep" | "Meditate" | "Exercise" | "Profile">("Home");
   const [activeCategory, setActiveCategory] = useState("All");
   const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFC]">
+        <div className="w-12 h-12 border-4 border-[#FF8C8C] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const categories = [
     { id: "All", icon: <Grid className="w-5 h-5" /> },
@@ -27,7 +43,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex justify-between items-start mb-6 lg:mb-12">
         <div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-[#1A1A2E] mb-1 lg:mb-2">Morning, Vishal!</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-[#1A1A2E] mb-1 lg:mb-2">Morning, {user?.name.split(' ')[0]}!</h1>
           <p className="text-[#8E8E9F] text-sm lg:text-base font-medium">Your daily wellness journey</p>
         </div>
         <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-slate-100 flex items-center justify-center text-[#F87171] bg-white shadow-sm hover:bg-slate-50 transition-colors">

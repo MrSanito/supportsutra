@@ -5,7 +5,7 @@ import Link from "next/link";
 import api from "../../lib/axios";
 import { loginSchema, type LoginFormData } from "@repo/zod";
 import { Outfit } from "next/font/google";
-import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, LogIn } from "lucide-react";
+import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, LogIn, CheckCircle2 } from "lucide-react";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
 
@@ -23,6 +23,8 @@ function FieldError({ message }: { message?: string }) {
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState<LoginFormData>({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -53,19 +55,41 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      console.log("Submitting login data:", formData);
       const res = await api.post("/auth/login", formData);
-      console.log("Login response:", res.data);
-      
       if (res.data.success) {
-        console.log("Login successful!");
-        window.location.href = "/dashboard";
+        setStep(2);
       } else {
         setServerError(res.data.message || "Login failed. Please try again.");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       const message = error.response?.data?.message || "Network error. Please check your connection and try again.";
+      setServerError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      setServerError("Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    setLoading(true);
+    setServerError(null);
+    try {
+      const res = await api.post("/auth/verify-login", {
+        email: formData.email,
+        otp,
+      });
+      if (res.data.success) {
+        window.location.href = "/dashboard";
+      } else {
+        setServerError(res.data.message || "Invalid OTP. Please try again.");
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Verification failed. Please try again.";
       setServerError(message);
     } finally {
       setLoading(false);
@@ -112,99 +136,160 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-            {/* Email */}
-            <div>
-              <label htmlFor="login-email" className="block text-xs font-bold text-[#8E8E9F] uppercase tracking-wider mb-2 pl-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Mail className={`w-5 h-5 ${fieldErrors.email ? "text-red-400" : "text-[#D0D0E0]"}`} />
-                </div>
-                <input
-                  id="login-email"
-                  type="email"
-                  autoComplete="email"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    if (fieldErrors.email) validateField("email", e.target.value);
-                  }}
-                  onBlur={(e) => validateField("email", e.target.value)}
-                  placeholder="you@example.com"
-                  className={`${inputClass("email")} pl-12 pr-4`}
-                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
-                  aria-invalid={!!fieldErrors.email}
-                />
-              </div>
-              <FieldError message={fieldErrors.email} />
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex items-center justify-between mb-2 pl-2 pr-1">
-                <label htmlFor="login-password" className="block text-xs font-bold text-[#8E8E9F] uppercase tracking-wider">
-                  Password
+          {step === 1 ? (
+            <div className="space-y-5">
+              {/* Email */}
+              <div>
+                <label htmlFor="login-email" className="block text-xs font-bold text-[#8E8E9F] uppercase tracking-wider mb-2 pl-2">
+                  Email
                 </label>
-                <Link href="/forgot-password" className="text-xs font-bold text-[#FF8C8C] hover:text-[#ff7373] transition-colors">
-                  Forgot?
-                </Link>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Lock className={`w-5 h-5 ${fieldErrors.password ? "text-red-400" : "text-[#D0D0E0]"}`} />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Mail className={`w-5 h-5 ${fieldErrors.email ? "text-red-400" : "text-[#D0D0E0]"}`} />
+                  </div>
+                  <input
+                    id="login-email"
+                    type="email"
+                    autoComplete="email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (fieldErrors.email) validateField("email", e.target.value);
+                    }}
+                    onBlur={(e) => validateField("email", e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
+                    placeholder="you@example.com"
+                    className={`${inputClass("email")} pl-12 pr-4`}
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                    aria-invalid={!!fieldErrors.email}
+                  />
                 </div>
-                <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={(e) => {
-                    setFormData({ ...formData, password: e.target.value });
-                    if (fieldErrors.password) validateField("password", e.target.value);
-                  }}
-                  onBlur={(e) => validateField("password", e.target.value)}
-                  placeholder="Enter your password"
-                  className={`${inputClass("password")} pl-12 pr-12`}
-                  aria-describedby={fieldErrors.password ? "password-error" : undefined}
-                  aria-invalid={!!fieldErrors.password}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-4 flex items-center text-[#D0D0E0] hover:text-[#1A1A2E] transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+                <FieldError message={fieldErrors.email} />
               </div>
-              <FieldError message={fieldErrors.password} />
-            </div>
 
-            {/* Submit */}
-            <button
-              id="login-submit"
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1A1A2E] text-white rounded-2xl font-bold py-4 text-sm transition-all duration-300 hover:bg-[#2A2A4A] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2 group"
-            >
-              {loading ? (
-                <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign In
-                  <LogIn className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
+              {/* Password */}
+              <div>
+                <div className="flex items-center justify-between mb-2 pl-2 pr-1">
+                  <label htmlFor="login-password" className="block text-xs font-bold text-[#8E8E9F] uppercase tracking-wider">
+                    Password
+                  </label>
+                  <Link href="/forgot-password" className="text-xs font-bold text-[#FF8C8C] hover:text-[#ff7373] transition-colors">
+                    Forgot?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Lock className={`w-5 h-5 ${fieldErrors.password ? "text-red-400" : "text-[#D0D0E0]"}`} />
+                  </div>
+                  <input
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={formData.password}
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value });
+                      if (fieldErrors.password) validateField("password", e.target.value);
+                    }}
+                    onBlur={(e) => validateField("password", e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
+                    placeholder="Enter your password"
+                    className={`${inputClass("password")} pl-12 pr-12`}
+                    aria-describedby={fieldErrors.password ? "password-error" : undefined}
+                    aria-invalid={!!fieldErrors.password}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-4 flex items-center text-[#D0D0E0] hover:text-[#1A1A2E] transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <FieldError message={fieldErrors.password} />
+              </div>
+
+              {/* Submit */}
+              <button
+                id="login-submit"
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full bg-[#1A1A2E] text-white rounded-2xl font-bold py-4 text-sm transition-all duration-300 hover:bg-[#2A2A4A] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2 group"
+              >
+                {loading ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <LogIn className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="text-center mb-4">
+                <p className="text-[#8E8E9F] text-sm font-medium">
+                  We've sent a 6-digit code to <span className="text-[#1A1A2E] font-bold">{formData.email}</span>
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="login-otp" className="block text-xs font-bold text-[#8E8E9F] uppercase tracking-wider mb-2 pl-2">
+                  Verification Code
+                </label>
+                <input
+                  id="login-otp"
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp(e as any)}
+                  placeholder="000000"
+                  className={`${inputBase} text-center text-2xl tracking-[0.5em] font-bold h-20 border-slate-200 hover:border-slate-300 focus:border-[#FF8C8C] focus:bg-white`}
+                  autoFocus
+                />
+              </div>
+
+              <button
+                id="otp-submit"
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={loading || otp.length !== 6}
+                className="w-full bg-[#1A1A2E] text-white rounded-2xl font-bold py-4 text-sm transition-all duration-300 hover:bg-[#2A2A4A] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2 group"
+              >
+                {loading ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    Verify & Sign In
+                    <CheckCircle2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="w-full text-[#8E8E9F] text-xs font-bold uppercase tracking-widest hover:text-[#1A1A2E] transition-colors"
+              >
+                Back to Login
+              </button>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-8">

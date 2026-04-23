@@ -7,6 +7,7 @@ import api from "../../lib/axios";
 import { registerSchema, type RegisterFormData } from "@repo/zod";
 import { Outfit } from "next/font/google";
 import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, Phone, User as UserIcon, CheckCircle2, ChevronRight, Camera } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
 
@@ -80,12 +81,14 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Registration form submitted");
     setServerError(null);
 
     const payload = { ...formData, agreeTerms: formData.agreeTerms as true };
     const result = registerSchema.safeParse(payload);
 
     if (!result.success) {
+      console.log("Validation failed:", result.error.format());
       const errors: FieldErrors = {};
       result.error.errors.forEach((err) => {
         const field = err.path[0] as keyof RegisterFormData;
@@ -99,12 +102,12 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await api.post("/auth/register", result.data);
+      const res = await api.post("/auth/register", formData);
       if (res.data.success) {
         localStorage.setItem("email", formData.email)
         setIsSuccess(true);
       } else {
-        setServerError(res.data.message || "Registration failed. Please try again.");
+        setServerError(res.data.message || "Registration failed.");
       }
     } catch (error: any) {
       const message = error.response?.data?.message || "Network error. Please check your connection and try again.";
@@ -187,7 +190,7 @@ export default function RegisterPage() {
                 <div className="flex-1 h-px bg-slate-100" />
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+              <div className="space-y-5">
                 {/* Profile Picture */}
                 <div className="flex items-center gap-5 p-4 bg-[#FAFAFC] border border-slate-100 rounded-2xl hover:border-[#5E8F8B]/50 transition-colors cursor-pointer group" onClick={() => fileInputRef.current?.click()}>
                   <div className="w-16 h-16 bg-white border-2 border-dashed border-[#D0D0E0] rounded-full overflow-hidden flex-shrink-0 relative flex items-center justify-center group-hover:border-[#5E8F8B] transition-colors">
@@ -226,6 +229,7 @@ export default function RegisterPage() {
                           if (fieldErrors.firstName) validateField("firstName", e.target.value);
                         }}
                         onBlur={(e) => validateField("firstName", e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
                         placeholder="Aarav"
                         className={`${inputClass("firstName")} pl-12 pr-4`}
                         aria-invalid={!!fieldErrors.firstName}
@@ -251,6 +255,7 @@ export default function RegisterPage() {
                           if (fieldErrors.lastName) validateField("lastName", e.target.value);
                         }}
                         onBlur={(e) => validateField("lastName", e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
                         placeholder="Sharma"
                         className={`${inputClass("lastName")} pl-12 pr-4`}
                         aria-invalid={!!fieldErrors.lastName}
@@ -279,6 +284,7 @@ export default function RegisterPage() {
                         if (fieldErrors.email) validateField("email", e.target.value);
                       }}
                       onBlur={(e) => validateField("email", e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
                       placeholder="aarav@example.com"
                       className={`${inputClass("email")} pl-12 pr-4`}
                       aria-invalid={!!fieldErrors.email}
@@ -311,6 +317,7 @@ export default function RegisterPage() {
                           if (fieldErrors.phone) validateField("phone", val);
                         }}
                         onBlur={(e) => validateField("phone", e.target.value.replace(/\D/g, ""))}
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
                         placeholder="98765 43210"
                         maxLength={10}
                         className="w-full bg-transparent text-[#1A1A2E] placeholder-[#8E8E9F] py-4 pl-12 pr-4 text-sm focus:outline-none"
@@ -337,6 +344,7 @@ export default function RegisterPage() {
                       value={formData.password}
                       onChange={(e) => handlePasswordChange(e.target.value)}
                       onBlur={(e) => validateField("password", e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit(e as any)}
                       placeholder="Min. 8 characters"
                       className={`${inputClass("password")} pl-12 pr-12`}
                       aria-invalid={!!fieldErrors.password}
@@ -425,7 +433,8 @@ export default function RegisterPage() {
                 {/* Submit */}
                 <button
                   id="register-submit"
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={loading}
                   className="w-full bg-[#1A1A2E] text-white rounded-2xl font-bold py-4 text-sm transition-all duration-300 hover:bg-[#2A2A4A] hover:shadow-lg active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6 group"
                 >
@@ -444,7 +453,7 @@ export default function RegisterPage() {
                     </>
                   )}
                 </button>
-              </form>
+              </div>
             </>
           )}
         </div>

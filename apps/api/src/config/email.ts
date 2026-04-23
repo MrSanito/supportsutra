@@ -120,7 +120,7 @@ export const getOtpHtml = ({ email, otp }: any) => {
 
 export const getVerifyEmailHtml = ({ email, token }: any) => {
   const appName = process.env.APP_NAME || "Support Sutra";
-  const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   const verifyUrl = `${baseUrl.replace(/\/+$/, "")}/token/${encodeURIComponent(
     token,
   )}`;
@@ -245,7 +245,7 @@ export const getVerifyEmailHtml = ({ email, token }: any) => {
 
 export const getForgotPasswordHtml = ({ email, token }: any) => {
   const appName = process.env.APP_NAME || "Support Sutra";
-  const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   const resetUrl = `${baseUrl.replace(/\/+$/, "")}/reset-password?token=${encodeURIComponent(
     token,
   )}`;
