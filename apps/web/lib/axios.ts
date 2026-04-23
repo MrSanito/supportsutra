@@ -8,8 +8,15 @@ const getCookie =  (name : string) => {
 }
 
 
+let baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1/";
+
+// Ensure baseURL has a protocol to prevent relative URL issues
+if (baseURL && !baseURL.startsWith("http://") && !baseURL.startsWith("https://")) {
+  baseURL = `https://${baseURL}`;
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1/",
+  baseURL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
