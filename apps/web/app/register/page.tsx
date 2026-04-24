@@ -7,6 +7,7 @@ import api from "../../lib/axios";
 import { registerSchema, type RegisterFormData } from "@repo/zod";
 import { Outfit } from "next/font/google";
 import { Sparkles, Mail, Lock, Eye, EyeOff, AlertCircle, Phone, User as UserIcon, CheckCircle2, ChevronRight, Camera } from "lucide-react";
+import toast from "react-hot-toast";
 import { useAppContext } from "../context/AppContext";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
@@ -172,6 +173,7 @@ export default function RegisterPage() {
               <button
                 id="register-google"
                 type="button"
+                onClick={() => toast.error("Coming Soon")}
                 className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 rounded-2xl py-3.5 text-sm font-bold text-[#1A1A2E] hover:bg-slate-50 hover:border-slate-200 transition-all duration-300 mb-6"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

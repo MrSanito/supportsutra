@@ -76,38 +76,34 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 403 && !originalRequest._retry) {
-const errorCode = error.response.data?.code || "";
-if(errorCode.startsWith("CSRF_")){
-  if (isRefreshingCSRFToken) {
-    return new Promise((resolve, reject) => {
-      csrfFailedQueue.push({ resolve, reject });
-    }).then(()=> api(originalRequest))
-    
-  }
-  
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+      // Prevent infinite loops if refresh requests fail
+      if (originalRequest.url === "/auth/refresh" || originalRequest.url === "/auth/refresh-csrf") {
+        return Promise.reject(error);
+      }
 
-  
+      const errorCode = error.response.data?.code || "";
+      if (errorCode.startsWith("CSRF_")) {
+        if (isRefreshingCSRFToken) {
+          return new Promise((resolve, reject) => {
+            csrfFailedQueue.push({ resolve, reject });
+          }).then(() => api(originalRequest));
+        }
 
-  originalRequest._retry = true;
-  isRefreshingCSRFToken = true;
-try {
-  await api.post( "/auth/refresh-csrf")
-  processCSRFQueue(null);
-  return api(originalRequest)
-  
-} catch (error) {
-
-  processCSRFQueue(error);
-  console.error("failed to refresh csrf toekn ", error)
-  return Promise.reject(error)
-  
-}
-finally{
-  isRefreshingCSRFToken = false;
-}
-
-}
+        originalRequest._retry = true;
+        isRefreshingCSRFToken = true;
+        try {
+          await api.post("/auth/refresh-csrf");
+          processCSRFQueue(null);
+          return api(originalRequest);
+        } catch (error) {
+          processCSRFQueue(error);
+          console.error("failed to refresh csrf token ", error);
+          return Promise.reject(error);
+        } finally {
+          isRefreshingCSRFToken = false;
+        }
+      }
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
