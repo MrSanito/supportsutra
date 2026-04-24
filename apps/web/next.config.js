@@ -2,7 +2,12 @@
 const nextConfig = {
   transpilePackages: ["@repo/ui", "@repo/zod", "@repo/database"],
   images: {
-    domains: ["images.unsplash.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
   },
 };
 

@@ -532,6 +532,7 @@ export default function Dashboard() {
           {activeTab === "Exercise" && renderExercise()}
           {activeTab === "Profile" && renderProfile()}
         </div>
+      </main>
       {/* Floating Action Button */}
       <button 
         onClick={() => router.push('/doctors')}
