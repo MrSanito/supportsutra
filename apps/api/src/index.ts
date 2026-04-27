@@ -18,7 +18,7 @@ app.use(cors({
   origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001", "https://supportsutra.zynito.in", "https://www.supportsutra.zynito.in"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie", "x-csrf-token"],
   exposedHeaders: ["Set-Cookie"]
 }));
 

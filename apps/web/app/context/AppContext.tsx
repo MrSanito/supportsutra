@@ -26,7 +26,9 @@ interface User {
   id: string;
   email: string;
   role: string;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
 }
 
 const AppContext = createContext<AuthContextType | null>(null);

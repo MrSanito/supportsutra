@@ -6,12 +6,39 @@ import crypto from "crypto";
 export const findUserByEmail = async (email: string) => {
   return await prisma.user.findUnique({
     where: { email },
+    include: {
+      profile: true,
+      doctorProfile: true,
+    },
   });
 };
 
-export const createUser = async (userData: any) => {
+export const createUser = async (userData: {
+  email: string;
+  phone: string;
+  passwordHash: string;
+  firstName: string;
+  lastName: string;
+  role?: any;
+}) => {
+  const { email, phone, passwordHash, firstName, lastName, role } = userData;
   return await prisma.user.create({
-    data: userData,
+    data: {
+      email,
+      phone,
+      passwordHash,
+      emailVerified: true,
+      role: role || "PATIENT",
+      profile: {
+        create: {
+          firstName,
+          lastName,
+        },
+      },
+    },
+    include: {
+      profile: true,
+    },
   });
 };
 

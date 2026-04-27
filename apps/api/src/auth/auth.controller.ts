@@ -24,14 +24,12 @@ export const register = TryCatch(async (req: Request, res: Response) => {
     });
   }
 
-  const { email, firstName, lastName, password } = validation.data;
-  const name = `${firstName} ${lastName}`;
+  const { email, firstName, lastName, password, phone } = validation.data;
 
   // Rate limiting
   const rateLimitKey = `register-rate-limit:${req.ip}:${email}`;
   const isAllowed = await redis.set(rateLimitKey, "1", "EX", 60, "NX");
   if (!isAllowed) {
-    console.log("not allowed")
     return res.status(429).json({ success: false, message: "Too many requests" });
   }
 
@@ -44,9 +42,11 @@ export const register = TryCatch(async (req: Request, res: Response) => {
   const verifyToken = crypto.randomBytes(32).toString("hex");
 
   await authService.storeRegistrationData(verifyToken, {
-    name,
+    firstName,
+    lastName,
+    phone,
     email,
-    password: hashedPassword,
+    passwordHash: hashedPassword,
   });
 
   const subject = "Verify Your Email for Account Creation";
@@ -85,9 +85,11 @@ export const verifyRegister = TryCatch(async (req: Request, res: Response) => {
   }
 
   const newUser = await authService.createUser({
-    name: userData.name,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    phone: userData.phone,
     email: userData.email,
-    password: userData.password,
+    passwordHash: userData.passwordHash,
   });
 
   await authService.deleteRegistrationData(token);
@@ -95,7 +97,12 @@ export const verifyRegister = TryCatch(async (req: Request, res: Response) => {
   return res.status(201).json({
     success: true,
     message: "Email verified successfully! Your account has been created.",
-    user: { id: newUser.id, name: newUser.name, email: newUser.email },
+    user: { 
+      id: newUser.id, 
+      email: newUser.email,
+      firstName: newUser.profile?.firstName,
+      lastName: newUser.profile?.lastName,
+    },
   });
 });
 
@@ -121,7 +128,7 @@ export const login = TryCatch(async (req: Request, res: Response) => {
     return res.status(404).json({ success: false, message: "Invalid credentials" });
   }
 
-  const isMatch = await authService.comparePassword(password, user.password);
+  const isMatch = await authService.comparePassword(password, user.passwordHash);
   if (!isMatch) {
     return res.status(400).json({ success: false, message: "Invalid credentials" });
   }
@@ -173,8 +180,14 @@ export const verifyLogin = TryCatch(async (req: Request, res: Response) => {
 
   return res.status(200).json({
     success: true,
-    message: `Welcome, ${user.name}`,
-    user: { id: user.id, name: user.name, email: user.email },
+    message: `Welcome, ${user.profile?.firstName || 'User'}`,
+    user: { 
+      id: user.id, 
+      email: user.email,
+      firstName: user.profile?.firstName,
+      lastName: user.profile?.lastName,
+      role: user.role
+    },
     sessionInfo: {
       sessionId: tokenData.sessionId,
       loginTime: new Date().toISOString(),

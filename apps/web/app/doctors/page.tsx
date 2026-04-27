@@ -158,10 +158,16 @@ export default function DoctorsPage() {
                   {doc.availability}
                 </div>
                 <div className="flex gap-2">
-                  <button className="w-10 h-10 rounded-xl bg-[#E8F3F1] text-[#5E8F8B] flex items-center justify-center hover:bg-[#5E8F8B] hover:text-white transition-all">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); alert("Direct messaging is Coming Soon!"); }}
+                    className="w-10 h-10 rounded-xl bg-[#E8F3F1] text-[#5E8F8B] flex items-center justify-center hover:bg-[#5E8F8B] hover:text-white transition-all"
+                  >
                     <MessageSquare className="w-5 h-5" />
                   </button>
-                  <button className="bg-[#1A1A2E] text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-[#FF8C8C] transition-colors">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); alert("Booking system is Coming Soon!"); }}
+                    className="bg-[#1A1A2E] text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-[#FF8C8C] transition-colors"
+                  >
                     Book Now
                   </button>
                 </div>

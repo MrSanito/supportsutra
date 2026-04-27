@@ -29,7 +29,18 @@ export const isAuth = TryCatch(async (req: Request, res: Response, next: NextFun
     
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, email: true, name: true, role: true }
+      select: { 
+        id: true, 
+        email: true, 
+        role: true,
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            avatarUrl: true
+          }
+        }
+      }
     });
 
     if (!user) {
