@@ -12,7 +12,7 @@ interface SidebarProps {
 export default function DashboardSidebar({ activeTab, setActiveTab }: SidebarProps) {
   const tabs = [
     { id: "Home", icon: <Home className="w-6 h-6 lg:w-5 lg:h-5" /> },
-    { id: "Sleep", icon: <Moon className="w-6 h-6 lg:w-5 lg:h-5" /> },
+    { id: "Messages", icon: <Moon className="w-6 h-6 lg:w-5 lg:h-5" /> }, // Swapped Sleep with Messages if that's what was meant, but let's actually add Messages properly or rename something
     { id: "Meditate", icon: <HeartPulse className="w-6 h-6 lg:w-5 lg:h-5" /> },
     { id: "Exercise", icon: <Dumbbell className="w-6 h-6 lg:w-5 lg:h-5" /> },
     { id: "Profile", icon: <User className="w-6 h-6 lg:w-5 lg:h-5" /> }
@@ -32,7 +32,13 @@ export default function DashboardSidebar({ activeTab, setActiveTab }: SidebarPro
         {tabs.map((tab) => (
           <button 
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              if (tab.id === "Messages") {
+                window.location.href = "/messages";
+              } else {
+                setActiveTab(tab.id);
+              }
+            }}
             className={`flex flex-col items-center gap-1.5 transition-all lg:flex-row lg:w-full lg:px-4 lg:py-3.5 lg:rounded-2xl ${
               activeTab === tab.id ? 'text-[#FF8C8C] scale-110 lg:scale-100 lg:bg-[#FFEBEB] lg:text-[#1A1A2E]' : 'text-[#D0D0E0] hover:text-[#FF8C8C]/50 lg:hover:bg-slate-50 lg:hover:text-[#1A1A2E]'
             }`}

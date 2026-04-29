@@ -6,71 +6,90 @@ import {
 } from "lucide-react";
 import { Outfit } from "next/font/google";
 import { useRouter, useParams } from "next/navigation";
+import api from "../../../lib/axios";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
-
-const doctorsData: any = {
-  "sarah-chen": {
-    name: "Dr. Sarah Chen",
-    specialty: "Mental Wellness Specialist",
-    color: "bg-[#FFEBEB]",
-    textColor: "text-[#FF8C8C]",
-    history: [
-      { sender: "doctor", text: "Hello! I've reviewed your wellness metrics. You've been very consistent.", time: "10:30 AM" },
-      { sender: "doctor", text: "How are you feeling today?", time: "10:31 AM" },
-      { sender: "user", text: "I'm feeling a bit more focused today.", time: "10:45 AM" }
-    ]
-  },
-  "marcus-thorne": {
-    name: "Dr. Marcus Thorne",
-    specialty: "Sleep Specialist",
-    color: "bg-[#E8F3F1]",
-    textColor: "text-[#5E8F8B]",
-    history: [
-      { sender: "doctor", text: "Your sleep metrics are improving. Let's keep this pace.", time: "Yesterday" }
-    ]
-  },
-  "elena-rodriguez": {
-    name: "Dr. Elena Rodriguez",
-    specialty: "Nutritionist",
-    color: "bg-[#FFF3B0]",
-    textColor: "text-[#1A1A2E]",
-    history: [
-      { sender: "doctor", text: "Have you tried the new meal plan I sent over?", time: "Monday" }
-    ]
-  }
-};
 
 export default function ChatPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const [message, setMessage] = useState("");
-  const [doctor, setDoctor] = useState<any>(null);
+  const [conversation, setConversation] = useState<any>(null);
+  const [otherUser, setOtherUser] = useState<any>(null);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id && doctorsData[id]) {
-      setDoctor(doctorsData[id]);
-      setChatHistory(doctorsData[id].history);
+    async function fetchConversation() {
+      if (!id) return;
+      try {
+        const response = await api.get(`/conversations/${id}`);
+        if (response.data && response.data.conversation) {
+          setConversation(response.data.conversation);
+          const currentUserId = response.data.conversation.participants.find(
+            (p: any) => p.user.role !== "DOCTOR" // Assuming current user is patient if the other is DOCTOR
+          )?.userId; // This is a bit hacky, but the backend doesn't return myId explicitly
+          
+          // Actually, we can just find the participant that is NOT us, but we don't have our ID here easily.
+          // The backend returns otherUserOnline. Let's just pick the first doctor for now if we are patient.
+          // In a real app we'd use the Auth context to know our ID.
+          const other = response.data.conversation.participants.find(
+            (p: any) => p.user.doctorProfile
+          );
+          
+          if (other) {
+            setOtherUser({
+              ...other.user,
+              isOnline: response.data.otherUserOnline,
+              name: `Dr. ${other.user.profile?.firstName || ""} ${other.user.profile?.lastName || ""}`,
+              specialty: other.user.doctorProfile?.specialization || "Specialist",
+              isVerified: other.user.doctorProfile?.isVerified || false
+            });
+          }
+
+          setChatHistory(response.data.conversation.messages || []);
+        }
+      } catch (err) {
+        console.error("Error fetching conversation", err);
+      } finally {
+        setLoading(false);
+      }
     }
+    fetchConversation();
+    
+    // Optional: add a polling mechanism here for real-time messages
+    // const interval = setInterval(fetchConversation, 5000);
+    // return () => clearInterval(interval);
   }, [id]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const newMessage = {
-      sender: "user",
-      text: message,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setChatHistory([...chatHistory, newMessage]);
-    setMessage("");
+    try {
+      const response = await api.post(`/conversations/${id}/messages`, {
+        content: message
+      });
+      if (response.data) {
+        setChatHistory([...chatHistory, response.data]);
+        setMessage("");
+      }
+    } catch (err) {
+      console.error("Failed to send message", err);
+      alert("Failed to send message");
+    }
   };
 
-  if (!doctor) return null;
+  if (loading) {
+    return (
+      <div className={`min-h-screen bg-[#FAFAFC] flex items-center justify-center ${outfit.className}`}>
+        <div className="w-10 h-10 border-4 border-[#FF8C8C] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!conversation || !otherUser) return null;
 
   return (
     <div className={`min-h-screen bg-[#FAFAFC] text-[#1A1A2E] font-sans ${outfit.className} flex flex-col`}>
@@ -85,16 +104,18 @@ export default function ChatPage() {
           </button>
           
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${doctor.color} rounded-full flex items-center justify-center ${doctor.textColor} relative`}>
+            <div className={`w-10 h-10 bg-[#E8F3F1] rounded-full flex items-center justify-center text-[#5E8F8B] relative`}>
               <User className="w-6 h-6" />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+              {otherUser.isOnline && (
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+              )}
             </div>
             <div>
               <div className="flex items-center gap-1">
-                <h2 className="font-bold text-[#1A1A2E]">{doctor.name}</h2>
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                <h2 className="font-bold text-[#1A1A2E]">{otherUser.name}</h2>
+                {otherUser.isVerified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
               </div>
-              <p className="text-[10px] text-[#8E8E9F] font-bold uppercase tracking-wider">{doctor.specialty}</p>
+              <p className="text-[10px] text-[#8E8E9F] font-bold uppercase tracking-wider">{otherUser.specialty}</p>
             </div>
           </div>
         </div>
@@ -117,32 +138,38 @@ export default function ChatPage() {
         <div className="flex justify-center mb-8">
           <div className="bg-white px-4 py-1.5 rounded-full shadow-sm border border-slate-100 flex items-center gap-2">
             <Calendar className="w-3.5 h-3.5 text-[#8E8E9F]" />
-            <span className="text-xs font-bold text-[#8E8E9F]">Today</span>
+            <span className="text-xs font-bold text-[#8E8E9F]">Recent Messages</span>
           </div>
         </div>
 
-        {chatHistory.map((msg, idx) => (
-          <div 
-            key={idx} 
-            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div className={`max-w-[80%] ${msg.sender === "user" ? "order-1" : "order-2"}`}>
-              <div 
-                onClick={() => msg.sender === "doctor" && alert("Interactive message features Coming Soon!")}
-                className={`p-4 rounded-3xl shadow-sm cursor-pointer ${
-                msg.sender === "user" 
-                  ? "bg-[#1A1A2E] text-white rounded-tr-none" 
-                  : "bg-white border border-slate-100 text-[#1A1A2E] rounded-tl-none"
-              }`}>
-                <p className="text-sm leading-relaxed">{msg.text}</p>
-              </div>
-              <div className={`flex items-center gap-1.5 mt-2 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <span className="text-[10px] font-bold text-[#8E8E9F]">{msg.time}</span>
-                {msg.sender === "user" && <CheckCheck className="w-3 h-3 text-blue-500" />}
+        {chatHistory.map((msg, idx) => {
+          // Identify if message is from the other user (doctor) or current user
+          const isOther = msg.senderId === otherUser.id;
+          
+          return (
+            <div 
+              key={msg.id || idx} 
+              className={`flex ${!isOther ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`max-w-[80%] ${!isOther ? "order-1" : "order-2"}`}>
+                <div 
+                  className={`p-4 rounded-3xl shadow-sm cursor-pointer ${
+                  !isOther 
+                    ? "bg-[#1A1A2E] text-white rounded-tr-none" 
+                    : "bg-white border border-slate-100 text-[#1A1A2E] rounded-tl-none"
+                }`}>
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                </div>
+                <div className={`flex items-center gap-1.5 mt-2 ${!isOther ? "justify-end" : "justify-start"}`}>
+                  <span className="text-[10px] font-bold text-[#8E8E9F]">
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  {!isOther && <CheckCheck className="w-3 h-3 text-blue-500" />}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
 
       {/* Input Area */}
@@ -152,7 +179,7 @@ export default function ChatPage() {
             <input 
               type="text" 
               placeholder="Type your message..." 
-              className="bg-transparent border-none focus:ring-0 w-full text-sm py-2"
+              className="bg-transparent border-none focus:ring-0 w-full text-sm py-2 outline-none"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />

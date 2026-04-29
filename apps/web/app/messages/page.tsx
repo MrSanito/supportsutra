@@ -1,56 +1,57 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   ArrowLeft, Search, User, ShieldCheck, ChevronRight, 
   MessageSquare, Clock, Filter, Plus
 } from "lucide-react";
 import { Outfit } from "next/font/google";
 import { useRouter } from "next/navigation";
+import api from "../../lib/axios";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ['300', '400', '500', '600', '700', '800'] });
 
 export default function MessagesList() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const conversations = [
-    {
-      id: "sarah-chen",
-      name: "Dr. Sarah Chen",
-      specialty: "Mental Wellness",
-      lastMessage: "I'd recommend trying the 'Deep Sleep' wind-down course tonight.",
-      time: "10:50 AM",
-      unread: 2,
-      online: true,
-      verified: true,
-      color: "bg-[#FFEBEB]",
-      textColor: "text-[#FF8C8C]"
-    },
-    {
-      id: "marcus-thorne",
-      name: "Dr. Marcus Thorne",
-      specialty: "Sleep Specialist",
-      lastMessage: "Your sleep metrics are improving. Let's keep this pace.",
-      time: "Yesterday",
-      unread: 0,
-      online: false,
-      verified: true,
-      color: "bg-[#E8F3F1]",
-      textColor: "text-[#5E8F8B]"
-    },
-    {
-      id: "elena-rodriguez",
-      name: "Dr. Elena Rodriguez",
-      specialty: "Nutritionist",
-      lastMessage: "Have you tried the new meal plan I sent over?",
-      time: "Monday",
-      unread: 0,
-      online: true,
-      verified: false,
-      color: "bg-[#FFF3B0]",
-      textColor: "text-[#1A1A2E]"
+  useEffect(() => {
+    async function fetchConversations() {
+      try {
+        const response = await api.get("/conversations");
+        if (response.data && response.data.conversations) {
+          const formatted = response.data.conversations.map((chat: any, index: number) => {
+            const userProfile = chat.otherUser?.profile || {};
+            const isDoctor = chat.otherUser?.role === "DOCTOR";
+            const fullName = `${userProfile.firstName || ""} ${userProfile.lastName || ""}`.trim() || "User";
+            const name = isDoctor ? `Dr. ${fullName}` : fullName;
+            
+            return {
+              id: chat.id,
+              name,
+              specialty: chat.otherUser?.doctorProfile?.specialization || "Member",
+              lastMessage: chat.lastMessage?.content || "No messages yet.",
+              time: new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              unread: chat.unreadCount || 0,
+              online: chat.isOnline || false,
+              verified: chat.otherUser?.doctorProfile?.isVerified || false,
+              color: index % 2 === 0 ? "bg-[#FFEBEB]" : "bg-[#E8F3F1]",
+              textColor: index % 2 === 0 ? "text-[#FF8C8C]" : "text-[#5E8F8B]",
+            };
+          });
+          setConversations(formatted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch conversations:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+    fetchConversations();
+  }, []);
+
+
 
   return (
     <div className={`min-h-screen bg-[#FAFAFC] text-[#1A1A2E] font-sans ${outfit.className} flex flex-col`}>
@@ -102,43 +103,53 @@ export default function MessagesList() {
 
       {/* Conversations List */}
       <main className="flex-1 px-6 py-4 space-y-3">
-        {conversations.map((chat) => (
-          <button 
-            key={chat.id}
-            onClick={() => router.push(`/messages/${chat.id}`)}
-            className="w-full bg-white p-4 rounded-[2rem] border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group"
-          >
-            <div className={`w-14 h-14 ${chat.color} ${chat.textColor} rounded-full flex items-center justify-center relative flex-shrink-0`}>
-              <User className="w-7 h-7" />
-              {chat.online && (
-                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-              )}
-            </div>
-
-            <div className="flex-1 text-left min-w-0">
-              <div className="flex justify-between items-center mb-1">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="font-bold text-[#1A1A2E] truncate">{chat.name}</h3>
-                  {chat.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
-                </div>
-                <span className="text-[10px] font-bold text-[#8E8E9F]">{chat.time}</span>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 border-4 border-[#FF8C8C] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="text-center py-12 text-[#8E8E9F] font-medium">
+            No conversations found.
+          </div>
+        ) : (
+          conversations.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).map((chat) => (
+            <button 
+              key={chat.id}
+              onClick={() => router.push(`/messages/${chat.id}`)}
+              className="w-full bg-white p-4 rounded-[2rem] border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group"
+            >
+              <div className={`w-14 h-14 ${chat.color} ${chat.textColor} rounded-full flex items-center justify-center relative flex-shrink-0`}>
+                <User className="w-7 h-7" />
+                {chat.online && (
+                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                )}
               </div>
-              <p className="text-xs text-[#8E8E9F] font-bold uppercase tracking-wider mb-1">{chat.specialty}</p>
-              <p className="text-sm text-[#8E8E9F] truncate group-hover:text-[#1A1A2E] transition-colors">
-                {chat.lastMessage}
-              </p>
-            </div>
 
-            <div className="flex flex-col items-end gap-2">
-              {chat.unread > 0 && (
-                <div className="bg-[#FF8C8C] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
-                  {chat.unread}
+              <div className="flex-1 text-left min-w-0">
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-bold text-[#1A1A2E] truncate">{chat.name}</h3>
+                    {chat.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
+                  </div>
+                  <span className="text-[10px] font-bold text-[#8E8E9F]">{chat.time}</span>
                 </div>
-              )}
-              <ChevronRight className="w-5 h-5 text-[#D0D0E0] group-hover:text-[#1A1A2E] transition-colors" />
-            </div>
-          </button>
-        ))}
+                <p className="text-xs text-[#8E8E9F] font-bold uppercase tracking-wider mb-1">{chat.specialty}</p>
+                <p className="text-sm text-[#8E8E9F] truncate group-hover:text-[#1A1A2E] transition-colors">
+                  {chat.lastMessage}
+                </p>
+              </div>
+
+              <div className="flex flex-col items-end gap-2">
+                {chat.unread > 0 && (
+                  <div className="bg-[#FF8C8C] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                    {chat.unread}
+                  </div>
+                )}
+                <ChevronRight className="w-5 h-5 text-[#D0D0E0] group-hover:text-[#1A1A2E] transition-colors" />
+              </div>
+            </button>
+          ))
+        )}
       </main>
 
       {/* Quick Stats / Empty State if needed */}

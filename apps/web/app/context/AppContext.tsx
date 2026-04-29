@@ -29,6 +29,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
+  doctorProfile?: any;
 }
 
 const AppContext = createContext<AuthContextType | null>(null);

@@ -39,7 +39,8 @@ export const isAuth = TryCatch(async (req: Request, res: Response, next: NextFun
             lastName: true,
             avatarUrl: true
           }
-        }
+        },
+        doctorProfile: true
       }
     });
 

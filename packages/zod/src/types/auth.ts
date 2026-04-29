@@ -39,7 +39,10 @@ export const registerSchema = z.object({
     .string()
     .min(1, "Mobile number is required")
     .length(10, "Mobile number must be exactly 10 digits")
-    .regex(/^[6-9][0-9]{9}$/, "Enter a valid Indian mobile number starting with 6, 7, 8 or 9"),
+    .regex(
+      /^[6-9][0-9]{9}$/,
+      "Enter a valid Indian mobile number starting with 6, 7, 8 or 9",
+    ),
 
   password: z
     .string()
@@ -47,11 +50,21 @@ export const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must include at least one uppercase letter")
     .regex(/[0-9]/, "Password must include at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must include at least one special character"),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must include at least one special character",
+    ),
 
   agreeTerms: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the Terms of Service to continue" }),
+    errorMap: () => ({
+      message: "You must accept the Terms of Service to continue",
+    }),
   }),
 });
 
+
 export type RegisterFormData = z.infer<typeof registerSchema>;
+export const UUIDParam = z.object({
+  id: z.string().uuid("Invalid ID format"),
+});
+export type UUIdPaaramsType = z.infer<typeof UUIDParam>;
