@@ -82,8 +82,14 @@ export const startConversationWithDoctor = TryCatch(async (req:Request, res: Res
                id: true,
                role: true,
                profile: {
-                 select: { firstName: true, lastName: true, avatarUrl: true },
-               },
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+              doctorProfile: {
+                select: {
+                  specialization: true,
+                  isVerified: true,
+                },
+              },
              },
            },
          },
@@ -107,8 +113,14 @@ export const startConversationWithDoctor = TryCatch(async (req:Request, res: Res
                id: true,
                role: true,
                profile: {
-                 select: { firstName: true, lastName: true, avatarUrl: true },
-               },
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+              doctorProfile: {
+                select: {
+                  specialization: true,
+                  isVerified: true,
+                },
+              },
              },
            },
          },
@@ -143,8 +155,14 @@ export const listMyConversations = TryCatch(async (req: Request, res: Response) 
              id: true,
              role: true,
              profile: {
-               select: { firstName: true, lastName: true, avatarUrl: true },
-             },
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+              doctorProfile: {
+                select: {
+                  specialization: true,
+                  isVerified: true,
+                },
+              },
            },
          },
        },
@@ -195,8 +213,9 @@ export const listMyConversations = TryCatch(async (req: Request, res: Response) 
     };
   });
 
- await redis.set(cacheKey, JSON.stringify(result), "EX", 300);
- res.json(result);});
+ await redis.set(cacheKey, JSON.stringify({ conversations: result }), "EX", 300);
+  res.json({ conversations: result });
+});
 
 
 
@@ -216,8 +235,9 @@ export const getOneconversation = TryCatch(async (req: Request, res: Response) =
              id: true,
              role: true,
              profile: {
-               select: { firstName: true, lastName: true, avatarUrl: true },
-             },
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+
              doctorProfile: {
                select: {
                  specialization: true,
