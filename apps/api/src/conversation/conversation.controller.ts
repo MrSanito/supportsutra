@@ -2,7 +2,7 @@
 // POST /api/conversations             — patient starts a chat with a doctor
 // GET  /api/conversations             — list my conversations (patient or doctor)
 // GET  /api/conversations/:id         — get one conversation (validates membership)
-
+ 
 import { Router } from "express";
  import { prisma } from "@repo/database";
 import { redis } from "@repo/redis";

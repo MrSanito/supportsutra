@@ -149,14 +149,8 @@ export default function DoctorOnboardingPage() {
                     aria-invalid={!!fieldErrors.specialization}
                   >
                     <option value="" disabled>Select specialization</option>
-                    <option value="General Physician">General Physician</option>
-                    <option value="Cardiologist">Cardiologist</option>
-                    <option value="Dermatologist">Dermatologist</option>
-                    <option value="Pediatrician">Pediatrician</option>
+                    <option value="Physician">Physician</option>
                     <option value="Psychiatrist">Psychiatrist</option>
-                    <option value="Neurologist">Neurologist</option>
-                    <option value="Orthopedic">Orthopedic</option>
-                    <option value="Gynecologist">Gynecologist</option>
                   </select>
                 </div>
                 <FieldError message={fieldErrors.specialization} />

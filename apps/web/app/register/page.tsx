@@ -399,7 +399,7 @@ export default function RegisterPage() {
 
                 {/* Terms */}
                 <div className="pt-2">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-4 p-4 bg-[#FAFAFC] rounded-2xl border border-slate-100 group hover:border-[#5E8F8B]/30 transition-all duration-300">
                     <button
                       type="button"
                       id="register-agreeTerms"
@@ -410,23 +410,25 @@ export default function RegisterPage() {
                           setFieldErrors((prev) => ({ ...prev, agreeTerms: undefined }));
                         }
                       }}
-                      className={`mt-1 w-5 h-5 rounded-md border-2 flex-shrink-0 transition-all duration-300 flex items-center justify-center ${
+                      className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex-shrink-0 transition-all duration-500 flex items-center justify-center ${
                         fieldErrors.agreeTerms
-                          ? "border-red-400 bg-red-50"
+                          ? "border-red-400 bg-red-50 shadow-[0_0_15px_rgba(239,68,68,0.1)]"
                           : formData.agreeTerms
-                          ? "bg-[#5E8F8B] border-[#5E8F8B]"
-                          : "border-[#D0D0E0] bg-white hover:border-[#5E8F8B]"
+                          ? "bg-[#5E8F8B] border-[#5E8F8B] shadow-[0_4px_12px_rgba(94,143,139,0.3)]"
+                          : "border-[#D0D0E0] bg-white group-hover:border-[#5E8F8B]"
                       }`}
                       aria-checked={formData.agreeTerms}
                       role="checkbox"
                     >
-                      {formData.agreeTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      {formData.agreeTerms && (
+                        <CheckCircle2 className="w-4 h-4 text-white animate-in zoom-in duration-300" />
+                      )}
                     </button>
                     <p className="text-sm text-[#8E8E9F] font-medium leading-relaxed">
-                      I agree to the{" "}
-                      <Link href="/terms" className="text-[#1A1A2E] font-bold hover:text-[#5E8F8B] transition-colors underline decoration-2 underline-offset-4 decoration-[#5E8F8B]/30 hover:decoration-[#5E8F8B]">Terms of Service</Link>
+                      I acknowledge that I have read and agree to the{" "}
+                      <Link href="/terms" className="text-[#1A1A2E] font-bold hover:text-[#5E8F8B] transition-all underline decoration-2 underline-offset-4 decoration-[#5E8F8B]/20 hover:decoration-[#5E8F8B]">Terms of Service</Link>
                       {" "}and{" "}
-                      <Link href="/privacy" className="text-[#1A1A2E] font-bold hover:text-[#5E8F8B] transition-colors underline decoration-2 underline-offset-4 decoration-[#5E8F8B]/30 hover:decoration-[#5E8F8B]">Privacy Policy</Link>
+                      <Link href="/privacy" className="text-[#1A1A2E] font-bold hover:text-[#5E8F8B] transition-all underline decoration-2 underline-offset-4 decoration-[#5E8F8B]/20 hover:decoration-[#5E8F8B]">Privacy Policy</Link>
                     </p>
                   </div>
                   <FieldError message={fieldErrors.agreeTerms} />

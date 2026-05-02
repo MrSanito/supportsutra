@@ -277,8 +277,13 @@ export default function Home() {
               Supporting your mental and emotional wellness journey through beautiful digital experiences.
             </p>
           </div>
-          <div className="md:text-right font-medium text-[#8E8E9F]">
-            <p>&copy; 2026 Support Sutra. Built for your mind.</p>
+          <div className="md:text-right font-medium text-[#8E8E9F] space-y-4">
+            <div className="flex flex-wrap md:justify-end gap-x-8 gap-y-2 text-[10px] uppercase tracking-[0.2em] font-bold">
+              <Link href="/terms" className="hover:text-[#1A1A2E] transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="hover:text-[#1A1A2E] transition-colors">Privacy Policy</Link>
+              <a href="mailto:support@supportsutra.com" className="hover:text-[#1A1A2E] transition-colors">Support</a>
+            </div>
+            <p className="text-xs">&copy; 2026 Support Sutra. Built for your mind.</p>
           </div>
         </div>
       </footer>

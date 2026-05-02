@@ -85,7 +85,7 @@ export default function LoginPage() {
         otp,
       });
       if (res.data.success) {
-        window.location.href = "/dashboard";
+        window.location.href = "/dashboard_v2";
       } else {
         setServerError(res.data.message || "Invalid OTP. Please try again.");
       }
