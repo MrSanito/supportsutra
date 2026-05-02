@@ -22,7 +22,10 @@ import {
   ChevronRight,
   Send,
   LogOut,
+  User as UserIcon,
+  ShieldCheck,
 } from "lucide-react";
+import api from "../../lib/axios";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -225,8 +228,17 @@ function DoctorsTab() {
 }
 
 /* ─────────────── CHAT TAB ─────────────── */
-function ChatTab() {
+function ChatTab({ conversations, loading }: { conversations: any[]; loading: boolean }) {
   const router = useRouter();
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 animate-fadeIn">
+        <div className="w-10 h-10 border-4 border-[#FF8C8C] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-sm text-[#8E8E9F] font-medium">Loading conversations...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -236,32 +248,73 @@ function ChatTab() {
         <p className="text-sm text-[#8E8E9F] mt-1">Your conversations with specialists</p>
       </div>
 
-      {/* Empty State */}
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-20 h-20 bg-[#FF8C8C]/10 rounded-full flex items-center justify-center mb-5">
-          <MessageCircle className="w-9 h-9 text-[#FF8C8C]" />
+      {conversations.length === 0 ? (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-20 h-20 bg-[#FF8C8C]/10 rounded-full flex items-center justify-center mb-5">
+            <MessageCircle className="w-9 h-9 text-[#FF8C8C]" />
+          </div>
+          <h3 className="text-lg font-bold text-[#1A1A2E] mb-2">No conversations yet</h3>
+          <p className="text-sm text-[#8E8E9F] max-w-[240px] leading-relaxed">
+            Start a conversation with a doctor to begin your wellness journey.
+          </p>
+          <button
+            onClick={() => router.push("/doctors")}
+            className="mt-6 bg-[#1A1A2E] text-white rounded-2xl font-bold py-3 px-8 text-sm hover:bg-[#2A2A4A] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
+          >
+            Find a Doctor
+            <Send className="w-4 h-4" />
+          </button>
         </div>
-        <h3 className="text-lg font-bold text-[#1A1A2E] mb-2">No conversations yet</h3>
-        <p className="text-sm text-[#8E8E9F] max-w-[240px] leading-relaxed">
-          Start a conversation with a doctor to begin your wellness journey.
-        </p>
-        <button
-          onClick={() => router.push("/doctors")}
-          className="mt-6 bg-[#1A1A2E] text-white rounded-2xl font-bold py-3 px-8 text-sm hover:bg-[#2A2A4A] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
-        >
-          Find a Doctor
-          <Send className="w-4 h-4" />
-        </button>
-      </div>
+      ) : (
+        /* Conversation List */
+        <div className="space-y-3">
+          {conversations.map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => router.push(`/messages/${chat.id}`)}
+              className="w-full bg-white p-4 rounded-3xl border border-slate-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 text-left group"
+            >
+              <div className={`w-14 h-14 ${chat.color} ${chat.textColor} rounded-2xl flex items-center justify-center relative flex-shrink-0`}>
+                <UserIcon className="w-7 h-7" />
+                {chat.online && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                )}
+              </div>
 
-      {/* Go to full messages */}
-      <button
-        onClick={() => router.push("/messages")}
-        className="w-full bg-white border border-slate-200 text-[#1A1A2E] rounded-2xl font-bold py-3.5 text-sm hover:bg-slate-50 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
-      >
-        View All Messages
-        <ArrowRight className="w-4 h-4" />
-      </button>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-bold text-[#1A1A2E] truncate">{chat.name}</h3>
+                    {chat.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
+                  </div>
+                  <span className="text-[10px] font-bold text-[#8E8E9F]">{chat.time}</span>
+                </div>
+                <p className="text-[11px] text-[#8E8E9F] font-bold uppercase tracking-wider mb-1">{chat.specialty}</p>
+                <p className="text-sm text-[#8E8E9F] truncate group-hover:text-[#1A1A2E] transition-colors leading-tight">
+                  {chat.lastMessage}
+                </p>
+              </div>
+
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                {chat.unread > 0 && (
+                  <div className="bg-[#FF8C8C] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                    {chat.unread}
+                  </div>
+                )}
+                <ChevronRight className="w-4 h-4 text-[#D0D0E0] group-hover:text-[#1A1A2E] transition-colors" />
+              </div>
+            </button>
+          ))}
+          
+          <button
+            onClick={() => router.push("/messages")}
+            className="w-full bg-white/50 border border-dashed border-slate-200 text-[#8E8E9F] rounded-2xl font-bold py-4 text-xs hover:bg-white hover:border-slate-300 transition-all duration-200 mt-4"
+          >
+            Manage All Conversations
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -270,6 +323,8 @@ function ChatTab() {
 export default function DashboardV2() {
   const { user, loading, logOutUser } = useAppContext();
   const [activeTab, setActiveTab] = useState<TabType>("home");
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [convLoading, setConvLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -277,6 +332,44 @@ export default function DashboardV2() {
       router.push("/login");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user) {
+      fetchConversations();
+    }
+  }, [user]);
+
+  async function fetchConversations() {
+    try {
+      const response = await api.get("/conversations");
+      if (response.data && response.data.conversations) {
+        const formatted = response.data.conversations.map((chat: any, index: number) => {
+          const userProfile = chat.otherUser?.profile || {};
+          const isDoctor = chat.otherUser?.role === "DOCTOR";
+          const fullName = `${userProfile.firstName || ""} ${userProfile.lastName || ""}`.trim() || "User";
+          const name = isDoctor ? `Dr. ${fullName}` : fullName;
+          
+          return {
+            id: chat.id,
+            name,
+            specialty: chat.otherUser?.doctorProfile?.specialization || "Member",
+            lastMessage: chat.lastMessage?.content || "No messages yet.",
+            time: chat.lastMessageAt ? new Date(chat.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "New",
+            unread: chat.unreadCount || 0,
+            online: chat.otherUser?.isOnline || false,
+            verified: chat.otherUser?.doctorProfile?.isVerified || false,
+            color: index % 2 === 0 ? "bg-[#FFEBEB]" : "bg-[#E8F3F1]",
+            textColor: index % 2 === 0 ? "text-[#FF8C8C]" : "text-[#5E8F8B]",
+          };
+        });
+        setConversations(formatted);
+      }
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
+    } finally {
+      setConvLoading(false);
+    }
+  }
 
   if (loading || !user) {
     return (
@@ -299,7 +392,7 @@ export default function DashboardV2() {
       case "doctors":
         return <DoctorsTab />;
       case "chat":
-        return <ChatTab />;
+        return <ChatTab conversations={conversations} loading={convLoading} />;
       default:
         return <HomeTab firstName={user?.firstName || "User"} />;
     }
