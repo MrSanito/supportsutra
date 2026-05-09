@@ -1,6 +1,6 @@
 // src/socket/handlers.js
 const EVENTS = require("./events");
-import EVENTS
+
 
 function registerHandlers(io, socket) {
   socket.on(EVENTS.CHAT_MESSAGE, (data) => {
@@ -15,3 +15,4 @@ function registerHandlers(io, socket) {
 }
 
 module.exports = { registerHandlers };
+

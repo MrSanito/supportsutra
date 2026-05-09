@@ -152,7 +152,7 @@ export default function DoctorOnboardingPage() {
                     <option value="Physician">Physician</option>
                     <option value="Psychiatrist">Psychiatrist</option>
                   </select>
-                </div>
+                </div>   
                 <FieldError message={fieldErrors.specialization} />
               </div>
 
